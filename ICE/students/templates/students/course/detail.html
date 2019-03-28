@@ -1,3 +1,10 @@
+<!-- 
+    This is the template for enrolled students to access the contents of a course
+    1. build an HTML list including all course modules and higlight the current module
+    2. Iterate over the current module contents and 
+        access each content item to display it using  item.render 
+ -->
+
 {% extends "base.html" %}
 {% load cache %}
 
@@ -28,13 +35,11 @@
         </ul>
     </div>
     <div class="module">
-        {% cache 600 module_contents module %}
-            {% for content in module.contents.all %}
-                {% with item=content.item %}
-                    <h2>{{ item.title }}</h2>
-                    {{ item.render }}
-                {% endwith %}
-            {% endfor %}
-        {% endcache %}
+        {% for content in module.contents.all %}
+            {% with item=content.item %}
+                <h2>{{ item.title }}</h2>
+                {{ item.render }}
+            {% endwith %}
+        {% endfor %}
     </div>
 {% endblock %}

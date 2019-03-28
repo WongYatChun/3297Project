@@ -43,6 +43,8 @@ from students.forms import CourseEnrollForm
 
 from braces.views import CsrfExemptMixin, JsonRequestResponseMixin
 
+from django.views.generic.detail import DetailView
+
 class OwnerMixin(object):
     # Used for views that interact with any model that contains an owner attribute
     def get_queryset(self):
@@ -227,43 +229,6 @@ class ModuleContentListView(TemplateResponseMixin, View):
         course__owner=request.user)
         return self.render_to_response({'module': module})
 
-class CourseListView(TemplateResponseMixin, View):
-    """ 
-    course catalog, list all available courses, optionally filtered by categories
-    display a single course overview
-    """
-    model = Course
-    template_name = 'courses/course/list.html'
-    def get(self, request, category=None):
-        # retrieve all categoress, including 
-        #   the total number of courses for each of them
-        categories = Category.objects.annotate(total_courses=Count('courses'))
-        # retrieve all available courses, including the total number 
-        #   of modules contained in each course.
-        courses = Course.objects.annotate(total_modules=Count('modules'))
-        if category:
-            # If a category slug URL parameter is given, 
-            #   retrieve the corresponding category object and we limit the query to the 
-            #   courses that belong to the given category.
-            category = get_object_or_404(Category, slug=category)
-            courses = courses.filter(category=category)
-        # render the objects to a template and return an HTTP response
-        return self.render_to_response({'categories': categories, 'category': category, 'courses': courses})
-
-# displaying a single course overview
-
-from django.views.generic.detail import DetailView
-class CourseDetailView(DetailView):
-    """ retrieve a single object for the given model. 
-    Then, it renders the template specified in template_name , 
-    including the object in the context as object. """
-    model = Course
-    template_name = 'courses/course/detail.html'
-    def get_context_data(self, **kwargs):
-        context = super(CourseDetailView,self).get_context_data(**kwargs)
-        context['enroll_form'] = CourseEnrollForm(initial={'course':self.object})
-        return context
-
 
 class ModuleOrderView(CsrfExemptMixin, # avoid checking the CSRF token in the POST request, need this to perform AJAX POST requests without having to generate a csrf_token
                       JsonRequestResponseMixin, # Parse the request data as JSON and Serialize the response as JSON and return an HTTP response with the `application/json` content type
@@ -287,3 +252,46 @@ class ContentOrderView(CsrfExemptMixin,
             Content.objects.filter(id=id,
                                     module__course__owner=request.user).update(order=order)
         return self.render_json_response({'saved': 'OK'})
+
+
+class CourseListView(TemplateResponseMixin, View):
+    """ 
+    course catalog, list all available courses, optionally filtered by categories
+    display a single course overview
+    """
+    model = Course
+    template_name = 'courses/course/list.html'
+    def get(self, request, category=None):
+        # retrieve all categoress, including 
+        #   the total number of courses for each of them
+        categories = Category.objects.annotate(total_courses=Count('courses'))
+        # retrieve all available courses, including the total number 
+        #   of modules contained in each course.
+        courses = Course.objects.annotate(total_modules=Count('modules'))
+        if category:
+            # If a category slug URL parameter is given, 
+            #   retrieve the corresponding category object and we limit the query to the 
+            #   courses that belong to the given category.
+            category = get_object_or_404(Category, slug=category)
+            courses = courses.filter(category=category)
+        # render the objects to the template and return an HTTP response
+        return self.render_to_response({'categories': categories, 'category': category, 'courses': courses})
+
+# displaying a single course overview
+
+class CourseDetailView(DetailView):
+    """ retrieve a single object for the given model. 
+    Then, it renders the template specified in template_name , 
+    including the object in the context as object. """
+    model = Course
+    template_name = 'courses/course/detail.html'
+
+    def get_context_data(self, **kwargs):
+        """ include the enrollment form in the context for rendering the templates """
+        context = super(CourseDetailView,self).get_context_data(**kwargs)
+        # initialize the hiddencourse field of the form with the current `Course` object
+        #   s.t. it can submitted directly
+        context['enroll_form'] = CourseEnrollForm(initial={'course':self.object})
+        return context
+
+

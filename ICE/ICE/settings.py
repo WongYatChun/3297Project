@@ -27,20 +27,34 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+from django.urls import reverse_lazy
+
+# The setting used by the `auth` module to redirect the user to 
+    # after successfully login if no next parameter is present in the request
+    # after successfully login, students will be redirected to the `student_course_list` URL 
+    #   to view the courses that they are enrolled in
+LOGIN_REDIRECT_URL = reverse_lazy('student_course_list')
+
+# base URL to serve uploaded media files
+MEDIA_URL = '/media/'
+# local path where the files are located
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 # Application definition
 
 INSTALLED_APPS = [
+    # add the 'embed_video`
+    'embed_video',
     # add courses to the INSTALL_APPS setting as follows
     'courses.apps.CoursesConfig',
+    # student registration
+    'students.apps.StudentsConfig', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'students.apps.StudentsConfig', # student registration
-    'embed_video',
 ]
 
 MIDDLEWARE = [

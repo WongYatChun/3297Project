@@ -16,7 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
-# from courses.views import CourseListView
+from courses.views import CourseListView
+
+from django.conf import settings
+from django.conf.urls.static import static
 
 """ we want to display the list of courses in the URL
 http://127.0.0.1:8000/ and all other URLs for the courses application have
@@ -30,5 +33,14 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     # include the URL patterns of the courses application
     path('course/', include('courses.urls')),
-#    path('', CourseListView.as_view(), name='course_list'),
+    # display the list of courses in the URL http://127.0.0.1:8000/ and other URLs for the course application have the /course/ prefix
+    path('', CourseListView.as_view(), name='course_list'),
+    # include the URL patterns of the students application
+    path('students/', include('students.urls')),
 ]
+
+""" The Django development server will be in charge of serving the mediafiles during development 
+(that is, when the DEBUG setting is set to True ). """
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

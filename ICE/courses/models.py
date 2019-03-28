@@ -34,6 +34,11 @@ class Course(models.Model):
     description = models.TextField()
     create_time = models.DateTimeField(auto_now_add=True)
 
+    # Student: many-to-many relationship between the Course and User models
+    students = models.ManyToManyField(User, 
+                                     related_name='courses_joined',
+                                     blank = True)
+
     class Meta:
         ordering = ['create_time']
     
@@ -83,8 +88,19 @@ class ItemBase(models.Model):
     create_time = models.DateTimeField(auto_now_add=True)
     update_time = models.DateTimeField(auto_now = True)
 
-    # def render(self):
-    #     return render_to_string('courses/content/{}.html'.format(self._meta.model_name), {'item': self})
+    def render(self):
+        """ 
+        provide a common interface to render each type of content 
+        
+        render_to_string(): 
+            1. render a template 
+            2. return the rendered content as a string
+            Each kind of content is rendered using a template named after the content model.
+
+        self._meta.model_name:
+            generate the appropriate template name for each content model dynamically
+        """
+        return render_to_string('courses/content/{}.html'.format(self._meta.model_name), {'item': self})
 
     class Meta:
         abstract = True
@@ -103,5 +119,3 @@ class File(ItemBase):
 
 class Video(ItemBase):
     url = models.URLField()
-
-
