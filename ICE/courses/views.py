@@ -45,6 +45,8 @@ from braces.views import CsrfExemptMixin, JsonRequestResponseMixin
 
 from django.views.generic.detail import DetailView
 
+from django.core.cache import cache
+
 class OwnerMixin(object):
     # Used for views that interact with any model that contains an owner attribute
     def get_queryset(self):
@@ -262,18 +264,35 @@ class CourseListView(TemplateResponseMixin, View):
     model = Course
     template_name = 'courses/course/list.html'
     def get(self, request, category=None):
-        # retrieve all categoress, including 
+        # retrieve all categories, including 
         #   the total number of courses for each of them
-        categories = Category.objects.annotate(total_courses=Count('courses'))
+        #   cache the queries in our views
+        categories = cache.get('all_categories')
+        if not categories:
+            categories = Category.objects.annotate(total_courses=Count('courses'))
+            cache.set('all_categories',categories)
         # retrieve all available courses, including the total number 
         #   of modules contained in each course.
-        courses = Course.objects.annotate(total_modules=Count('modules'))
+        # cache both all_courses and courses filtered by category
+        # `all_courses` cache key for storing all courses if no category is given
+        all_courses = Course.objects.annotate(total_modules=Count('modules'))
         if category:
-            # If a category slug URL parameter is given, 
+            # If a category (slug URL parameter) is given, 
             #   retrieve the corresponding category object and we limit the query to the 
             #   courses that belong to the given category.
             category = get_object_or_404(Category, slug=category)
-            courses = courses.filter(category=category)
+            # dynamically build the key
+            key = 'category_{}_courses'.format(category.id)
+            courses = cache.get(key)
+            if not courses:
+                courses = all_courses.filter(category=category)
+                cache.set(key, courses)
+        else:
+            courses = cache.get('all_courses')
+            if not courses:
+                courses = all_courses
+                cache.set('all_courses', courses)
+
         # render the objects to the template and return an HTTP response
         return self.render_to_response({'categories': categories, 'category': category, 'courses': courses})
 

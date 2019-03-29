@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
+from django.urls import reverse_lazy
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -27,40 +29,36 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-from django.urls import reverse_lazy
-
-# The setting used by the `auth` module to redirect the user to 
-    # after successfully login if no next parameter is present in the request
-    # after successfully login, students will be redirected to the `student_course_list` URL 
-    #   to view the courses that they are enrolled in
-LOGIN_REDIRECT_URL = reverse_lazy('student_course_list')
-
-# base URL to serve uploaded media files
-MEDIA_URL = '/media/'
-# local path where the files are located
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 # Application definition
 
 INSTALLED_APPS = [
-    # add the 'embed_video`
-    'embed_video',
-    # add courses to the INSTALL_APPS setting as follows
-    'courses.apps.CoursesConfig',
-    # student registration
-    'students.apps.StudentsConfig', 
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # add the 'embed_video`
+    'embed_video',
+    # add courses to the INSTALL_APPS setting as follows
+    'courses.apps.CoursesConfig',
+    # student registration
+    'students.apps.StudentsConfig', 
+    # display statistics for Memcached instances in the admin site
+    'memcache_status',
+    # REST framework
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # allow per-site cache: place before CommonMiddleware since it runs during response time when middlewares are executed in reverse order
+    'django.middleware.cache.UpdateCacheMiddleware',
     'django.middleware.common.CommonMiddleware',
+    # allow per-site cache: place after ComminMiddleware because it needs to access request data set by the latter
+    'django.middleware.cache.FetchFromCacheMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -136,3 +134,40 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# The setting used by the `auth` module to redirect the user to 
+    # after successfully login if no next parameter is present in the request
+    # after successfully login, students will be redirected to the `student_course_list` URL 
+    #   to view the courses that they are enrolled in
+LOGIN_REDIRECT_URL = reverse_lazy('student_course_list')
+
+# base URL to serve uploaded media files
+MEDIA_URL = '/media/'
+# local path where the files are located
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+# default cache for our cache middleware
+CACHE_MIDDLEWARE_ALIAS = 'default'
+# glocal cachetimeout to 15 min
+CACHE_MIDDLEWARE_SECONDS = 60 * 15 # 15 minutes
+# specify a prefix for all cache keys to avoid collisions
+#   in case we use the same Memcached backend for multiple projects
+CACHE_MIDDLEWARE_KEY_PREFIX = 'ICE'
+
+# Configure the cache for ICE project
+""" 
+Using the `MemcachedCache` backend.
+Specify location using the `address:port` notation
+ """
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+ 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
