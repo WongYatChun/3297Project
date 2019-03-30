@@ -37,6 +37,8 @@ urlpatterns = [
     path('', CourseListView.as_view(), name='course_list'),
     # include the URL patterns of the students application
     path('students/', include('students.urls')),
+    # include the API patterns
+    path('api/', include('courses.api.urls', namespace='api')),
 ]
 
 """ The Django development server will be in charge of serving the mediafiles during development 

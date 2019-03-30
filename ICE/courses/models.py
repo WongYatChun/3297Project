@@ -26,7 +26,7 @@ class Category(models.Model):
 class Course(models.Model):
     # Course
     owner = models.ForeignKey(User,
-                              related_name= 'courses_create_date',
+                              related_name= 'courses_create_time',
                               on_delete = models.CASCADE)
     category = models.ForeignKey(Category, related_name='courses',on_delete = models.CASCADE)
     title = models.CharField(max_length = 200)
