@@ -49,6 +49,14 @@ INSTALLED_APPS = [
     'memcache_status',
     # REST framework
     'rest_framework',
+    # alluth
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.github',
+    # myccount
+    'myaccount',
 ]
 
 MIDDLEWARE = [
@@ -135,12 +143,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-# The setting used by the `auth` module to redirect the user to 
-    # after successfully login if no next parameter is present in the request
-    # after successfully login, students will be redirected to the `student_course_list` URL 
-    #   to view the courses that they are enrolled in
-LOGIN_REDIRECT_URL = reverse_lazy('student_course_list')
-
 # base URL to serve uploaded media files
 MEDIA_URL = '/media/'
 # local path where the files are located
@@ -168,6 +170,43 @@ CACHES = {
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
- 'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
     ]
+        
 }
+
+# allauth
+SITE_ID = 1
+
+
+# The setting used by the `auth` module to redirect the user to 
+    # after successfully login if no next parameter is present in the request
+    # after successfully login, students will be redirected to the `student_course_list` URL 
+    #   to view the courses that they are enrolled in
+# LOGIN_REDIRECT_URL = reverse_lazy('student_course_list')
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+LOGIN_REDIRECT_URL = '/accounts/profile/'
+
+ACCOUNT_SIGNUP_FORM_CLASS = 'myaccount.forms.SignupForm'
+
+# send email
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+)
+
+# Email Setting
+EMAIL_HOST = 'smtp.163.com'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = 'wongyatchun@163.com'
+EMAIL_HOST_PASSWORD = '1qaz2wsx'
+EMAIL_USE_TLS = True
+EMAIL_FROM = 'wongyatchun@163.com'
+DEFAULT_FROM_EMAIL = 'wongyatchun@163.com'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

@@ -26,6 +26,10 @@ http://127.0.0.1:8000/ and all other URLs for the courses application have
 the /course/ prefix. """
 
 urlpatterns = [
+    # allauth
+    path('accounts/',include('allauth.urls')),
+    # myaccount
+    path('accounts/', include('myaccount.urls')),
     # include log-in page
     path('accounts/login/', auth_views.LoginView.as_view(),name='login'),
     # incldue log-out page
