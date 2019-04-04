@@ -4,7 +4,6 @@ from . import views
 
 """ the result for the StudentCourseDetailView is cached for 15 minutes """
 
-app_name = "students"
 
 urlpatterns = [
      # register view

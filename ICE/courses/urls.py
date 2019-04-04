@@ -5,8 +5,6 @@
 from django.urls import path
 from . import views
 
-app_name = "courses"
-
 urlpatterns = [
       # Display a list for Courses to manage
       path('mine/',
