@@ -57,6 +57,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.github',
     # myccount
     'myaccount',
+    # invitations: email
+    'invitations',
 ]
 
 MIDDLEWARE = [
@@ -210,3 +212,6 @@ EMAIL_FROM = 'wongyatchun@163.com'
 DEFAULT_FROM_EMAIL = 'wongyatchun@163.com'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+# Add to settings.py
+ACCOUNT_ADAPTER = 'invitations.models.InvitationsAdapter'

@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from courses.views import CourseListView
+from django.conf.urls import url
 
 from django.conf import settings
 from django.conf.urls.static import static
@@ -43,6 +44,8 @@ urlpatterns = [
     path('students/', include('students.urls')),
     # include the API patterns
     path('api/', include('courses.api.urls', namespace='api')),
+    # path('invitations/', include('invitations.urls', namespace='invitations')),
+    url(r'^invitations/', include('invitations.urls', namespace='invitations')),
 ]
 
 """ The Django development server will be in charge of serving the mediafiles during development 

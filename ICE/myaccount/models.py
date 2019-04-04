@@ -11,6 +11,7 @@ class UserProfile(models.Model):
 
     mod_date = models.DateTimeField('Last modified', auto_now =True)
 
+
     class Meta:
         verbose_name = 'User Profle'
 
